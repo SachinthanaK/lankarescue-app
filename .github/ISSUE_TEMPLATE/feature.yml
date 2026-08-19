@@ -1,0 +1,30 @@
+name: Feature or improvement
+description: Propose a scoped, evidence-oriented improvement.
+title: "proposal: "
+labels: ["type:feature", "status:triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem and user/platform value
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance and verification
+    validations:
+      required: true
+  - type: textarea
+    id: tradeoffs
+    attributes:
+      label: Security, reliability, cost, and scope tradeoffs
+    validations:
+      required: true
+  - type: dropdown
+    id: maturity
+    attributes:
+      label: Target maturity level
+      options: [Level 1, Level 2, Level 3, Level 4, Level 5, Level 6 optional]
+    validations:
+      required: true
