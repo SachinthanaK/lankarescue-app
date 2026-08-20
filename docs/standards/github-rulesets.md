@@ -1,17 +1,16 @@
-# Planned GitHub Organization and Rulesets
+# GitHub Organization and Active Repository Protection
 
-Status: local specification; activation awaits GitHub organization, visibility, and owner/team confirmation.
+Status: active across five public repositories owned by `@SachinthanaK` as of 2026-08-20.
 
 ## All repositories
 
 - Default branch: `main`.
 - Block deletion and force push to `main`.
-- Require pull request before merge.
-- Require one approval where the selected GitHub plan supports it.
+- Require a pull request before merge; approval count is initially zero because one account cannot approve its own PR. Enable a second-person approval when collaborators exist.
 - Dismiss stale approvals after new commits.
 - Require conversation resolution.
 - Require configured status checks and the branch to be current where appropriate.
-- Require CODEOWNERS review after real user/team handles replace commented placeholders.
+- CODEOWNERS currently assigns `@SachinthanaK`; required CODEOWNERS review remains off until a separate reviewer/team exists.
 - Allow bypass only for a named emergency role, with an issue/audit trail.
 - Enable Dependabot/security advisories, secret scanning, and push protection where the selected plan supports them.
 - Disable Actions from unapproved sources and default workflow token to read-only.
@@ -42,11 +41,10 @@ Status: local specification; activation awaits GitHub organization, visibility, 
 - `staging`: promotion checks and environment-scoped identity.
 - `portfolio-prod`: explicit approval, restricted branches, separate federated credential/RBAC, no direct Kubernetes apply.
 
-## Pending decisions
+## Deferred tightening
 
-- GitHub organization/owner name.
-- Public versus private status during development and public-release timing.
-- Actual user/team handles and emergency bypass owner.
-- Available GitHub plan features.
-- Merge strategy and commit-signing requirement.
-- Status-check names after reusable workflows exist in Phase 7.
+- Replace the temporary single owner with real teams if collaborators join.
+- Require at least one independent approval when a second reviewer exists.
+- Add named required status checks after reusable workflows exist in Phase 7.
+- Re-evaluate commit-signing requirements before the first release.
+- Configure protected GitHub environments and OIDC identities in their approved later phases.
