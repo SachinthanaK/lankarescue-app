@@ -1,0 +1,1 @@
+"""Alert ingestor service."""
