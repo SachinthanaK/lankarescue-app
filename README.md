@@ -1,43 +1,50 @@
 # LankaRescue Application
 
-Status: **Planned — Phase 0 foundation**
+Status: **Phase 1 local MVP implemented and tested**
 
-LankaRescue is an educational DevOps/platform/SRE portfolio workload for community disaster-relief coordination in Sri Lanka. It is not an official emergency-response service and is not affiliated with Sri Lanka's Disaster Management Centre.
+LankaRescue is an educational DevOps, platform-engineering, and SRE portfolio workload for community disaster-relief coordination in Sri Lanka. It is not an official emergency-response service and is not affiliated with Sri Lanka's Disaster Management Centre.
 
-## Responsibility
+## Implemented in Phase 1
 
-This repository owns:
+- compact mobile-first Next.js PWA;
+- citizen relief-request form and private status tracking;
+- FastAPI services for incidents, alert ingestion, resource matching, and notifications;
+- secure token hashing, correlation IDs, JSON logs, health endpoints, metadata, and OpenAPI;
+- local-only staff queue and mock alert provider;
+- automated Python and web quality gates.
 
-- the compact Next.js PWA;
-- `incident-api`, `alert-ingestor`, `resource-matcher`, and `notification-worker`;
-- shared event, observability, authentication, and database libraries;
-- API/event contracts, database migrations, and application tests;
-- product, architecture, ADR, security, SLO, runbook, recovery, experiment, cost, and portfolio-evidence documentation.
-
-It does not own Azure resource provisioning, the desired Kubernetes environment state, reusable CI implementation, or the Backstage/`lankaops` source.
-
-## Planned structure
+## Repository structure
 
 ```text
-apps/web/
-services/{incident-api,alert-ingestor,resource-matcher,notification-worker}/
+apps/web/                         Next.js frontend
+services/incident-api/            Relief-request HTTP API
+services/alert-ingestor/          Alert-provider adapters
+services/resource-matcher/        Resource-matching worker
+services/notification-worker/     Notification worker
 libs/{events,observability,auth,database}/
-tests/{integration,contract,e2e,load}/
-docs/
+scripts/                          Local run and verification commands
+docs/                             Architecture, security, runbooks, and evidence
 ```
 
-## Current phase
+## Run locally
 
-Phase 0 contains governance and architecture only. Application implementation starts only after the Phase 0 gate is accepted.
+See [`docs/local-development.md`](docs/local-development.md). The short path after first setup is:
 
-See [`docs/backlog/roadmap.md`](docs/backlog/roadmap.md) and [`docs/adr/README.md`](docs/adr/README.md).
+```powershell
+.\scripts\run-local.ps1
+```
 
-## Capability labels
+Then open `http://localhost:3000` and `http://localhost:8000/docs`.
 
-- **Implemented** — present and demonstrable.
-- **Tested** — implemented and exercised with retained evidence.
-- **Reference architecture** — designed but not continuously deployed.
-- **Future enhancement** — intentionally deferred.
+## Current boundaries
+
+Phase 1 data is in memory, the UI is English-only, and staff access is a local demo. Do not use this application for real emergencies or real personal data. PostgreSQL, identity, asynchronous messaging, containers, Azure, Kubernetes, GitOps, and platform engineering are delivered in later phases.
+
+## Evidence and roadmap
+
+- [`docs/portfolio-evidence/phase-1-local-mvp.md`](docs/portfolio-evidence/phase-1-local-mvp.md)
+- [`docs/backlog/roadmap.md`](docs/backlog/roadmap.md)
+- [`docs/adr/README.md`](docs/adr/README.md)
 
 ## License
 
