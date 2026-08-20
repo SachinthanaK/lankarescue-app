@@ -1,12 +1,10 @@
-# Activation is intentionally pending confirmation of the GitHub organization
-# and owner/team handles. Phase 0 keeps the intended ownership paths here.
-# Replace the placeholders before enabling required CODEOWNERS review.
-#
-# *                              @ORG/platform-maintainers
-# /apps/web/                     @ORG/frontend-maintainers
-# /services/incident-api/        @ORG/backend-maintainers
-# /services/alert-ingestor/      @ORG/backend-maintainers
-# /services/resource-matcher/    @ORG/backend-maintainers
-# /services/notification-worker/ @ORG/backend-maintainers
-# /docs/adr/                     @ORG/platform-maintainers
-# /.github/                      @ORG/platform-maintainers
+# Temporary single-maintainer ownership for the portfolio foundation.
+# Replace path owners with teams if the project becomes collaborative.
+*                               @SachinthanaK
+/apps/web/                      @SachinthanaK
+/services/incident-api/         @SachinthanaK
+/services/alert-ingestor/       @SachinthanaK
+/services/resource-matcher/     @SachinthanaK
+/services/notification-worker/  @SachinthanaK
+/docs/adr/                      @SachinthanaK
+/.github/                       @SachinthanaK
