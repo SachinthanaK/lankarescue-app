@@ -43,9 +43,9 @@ P0 indicates required foundation/delivery/SRE work; P1 indicates core platform-e
 - [x] Responsibility boundaries documented.
 - [x] Documentation taxonomy, initial diagrams, standards, threat model, cost model, and ADRs created.
 - [x] Prioritized roadmap and capability labels defined.
-- [ ] GitHub organization, visibility, owner/team handles, hosted repositories, labels, rulesets, issue boards, and security-advisory URLs confirmed/configured.
-- [ ] Active CODEOWNERS patterns enabled after handles exist.
-- [ ] Phase 0 evidence review accepted.
+- [x] Five public repositories, owner, hosted histories, labels, topics, milestones, protection, and security-advisory URLs configured under `SachinthanaK`.
+- [x] Active temporary CODEOWNERS patterns assign `@SachinthanaK`; team ownership is deferred until collaborators exist.
+- [x] Phase 0 local and hosted validation evidence recorded.
 
 ## Approval boundaries
 
