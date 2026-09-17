@@ -1,5 +1,5 @@
 import logging
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
 from typing import Any
 from uuid import uuid4
@@ -31,6 +31,7 @@ def create_service_app(
     log_level: str,
     allowed_origins: list[str] | None = None,
     description: str = "",
+    readiness_check: Callable[[], Awaitable[bool]] | None = None,
 ) -> FastAPI:
     configure_logging(log_level)
     logger = logging.getLogger(service_name)
@@ -49,6 +50,7 @@ def create_service_app(
     )
     app.state.service_name = service_name
     app.state.environment = environment
+    app.state.readiness_check = readiness_check
 
     if allowed_origins:
         app.add_middleware(
@@ -92,12 +94,19 @@ def create_service_app(
             },
         )
 
+    @app.get("/health", response_model=HealthResponse, tags=["health"])
     @app.get("/health/live", response_model=HealthResponse, tags=["health"])
     async def live() -> HealthResponse:
         return HealthResponse(status="ok", service=service_name)
 
     @app.get("/health/ready", response_model=HealthResponse, tags=["health"])
-    async def ready() -> HealthResponse:
+    async def ready() -> HealthResponse | JSONResponse:
+        check = app.state.readiness_check
+        if check is not None and not await check():
+            return JSONResponse(
+                status_code=503,
+                content={"status": "not_ready", "service": service_name},
+            )
         return HealthResponse(status="ready", service=service_name)
 
     @app.get("/meta", response_model=MetadataResponse, tags=["metadata"])

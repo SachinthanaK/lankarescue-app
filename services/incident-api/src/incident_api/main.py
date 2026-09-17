@@ -3,7 +3,9 @@ from typing import Annotated
 from fastapi import Depends, HTTPException, Query, status
 from lankarescue_observability import create_service_app
 
-from .config import Settings, get_settings
+from .config import get_settings
+from .database import database_ready
+from .dependencies import get_repository, require_demo_staff
 from .models import (
     DemoQueueItem,
     ReliefRequestCreate,
@@ -11,12 +13,12 @@ from .models import (
     ReliefRequestView,
     TrackRequest,
 )
-from .repository import InMemoryReliefRequestRepository, ReliefRequestRepository
+from .postgres_repository import SqlAlchemyReliefRequestRepository
 from .service import ReliefRequestService, RequestNotFoundError
+from .staff_routes import router as staff_router
 
-VERSION = "0.1.0"
+VERSION = "0.2.0"
 settings = get_settings()
-repository = InMemoryReliefRequestRepository()
 
 app = create_service_app(
     service_name="incident-api",
@@ -24,16 +26,14 @@ app = create_service_app(
     environment=settings.app_env,
     log_level=settings.log_level,
     allowed_origins=settings.allowed_origin_list,
-    description="Submit and securely track LankaRescue relief requests.",
+    description="Persist, coordinate, and securely track LankaRescue relief requests.",
+    readiness_check=database_ready,
 )
-
-
-def get_repository() -> ReliefRequestRepository:
-    return repository
+app.include_router(staff_router)
 
 
 def get_service(
-    request_repository: Annotated[ReliefRequestRepository, Depends(get_repository)],
+    request_repository: Annotated[SqlAlchemyReliefRequestRepository, Depends(get_repository)],
 ) -> ReliefRequestService:
     return ReliefRequestService(request_repository)
 
@@ -81,13 +81,11 @@ async def track_relief_request(
     "/api/v1/demo/staff/relief-requests",
     response_model=list[DemoQueueItem],
     tags=["local demo"],
+    dependencies=[Depends(require_demo_staff)],
 )
 async def demo_staff_queue(
+    request_repository: Annotated[SqlAlchemyReliefRequestRepository, Depends(get_repository)],
     limit: Annotated[int, Query(ge=1, le=100)] = 50,
-    request_repository: Annotated[ReliefRequestRepository, Depends(get_repository)] = repository,
-    current_settings: Annotated[Settings, Depends(get_settings)] = settings,
 ) -> list[DemoQueueItem]:
-    if current_settings.app_env != "local" or not current_settings.enable_demo_staff:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
     records = await request_repository.list_recent(limit)
     return [DemoQueueItem.from_record(record) for record in records]

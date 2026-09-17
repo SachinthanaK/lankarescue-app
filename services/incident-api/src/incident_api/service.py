@@ -3,8 +3,8 @@ from datetime import UTC, datetime
 
 from lankarescue_auth import generate_tracking_token, hash_tracking_token, verify_tracking_token
 
-from .models import ReliefRequestCreate, ReliefRequestRecord
-from .repository import ReliefRequestRepository
+from .models import ReliefRequestCreate, ReliefRequestRecord, RequestStatus
+from .repository import EntityNotFoundError, ReliefRequestRepository
 
 
 class RequestNotFoundError(Exception):
@@ -30,3 +30,25 @@ class ReliefRequestService:
         if record is None or not verify_tracking_token(token, record.token_hash):
             raise RequestNotFoundError
         return record
+
+    async def transition(
+        self,
+        *,
+        reference: str,
+        target: RequestStatus,
+        actor: str,
+        expected_version: int,
+        reason: str | None,
+        correlation_id: str | None,
+    ) -> ReliefRequestRecord:
+        try:
+            return await self._repository.transition(
+                reference=reference,
+                target=target,
+                actor=actor,
+                expected_version=expected_version,
+                reason=reason,
+                correlation_id=correlation_id,
+            )
+        except EntityNotFoundError as error:
+            raise RequestNotFoundError from error

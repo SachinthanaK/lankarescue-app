@@ -7,6 +7,10 @@ class Settings(BaseSettings):
     app_env: str = "local"
     log_level: str = "INFO"
     enable_demo_staff: bool = True
+    database_url: str = (
+        "postgresql+asyncpg://lankarescue:local-development-only@localhost:5432/lankarescue"
+    )
+    database_echo: bool = False
     allowed_origins: str = "http://localhost:3000"
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")

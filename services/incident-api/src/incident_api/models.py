@@ -63,9 +63,13 @@ class ContactMethod(StrEnum):
 
 class RequestStatus(StrEnum):
     SUBMITTED = "submitted"
-    REVIEWING = "reviewing"
-    MATCHED = "matched"
+    TRIAGED = "triaged"
+    VERIFIED = "verified"
+    ASSIGNED = "assigned"
+    IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
+    REJECTED = "rejected"
+    CANCELLED = "cancelled"
 
 
 class ReliefRequestCreate(BaseModel):
@@ -92,6 +96,7 @@ class ReliefRequestRecord(BaseModel):
     id: UUID = Field(default_factory=uuid4)
     reference: str
     token_hash: str
+    incident_id: UUID | None = None
     district: District
     location: str
     need_type: NeedType
@@ -101,6 +106,7 @@ class ReliefRequestRecord(BaseModel):
     contact_method: ContactMethod
     contact_value: str
     status: RequestStatus = RequestStatus.SUBMITTED
+    version: int = 1
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
@@ -131,6 +137,7 @@ class ReliefRequestView(BaseModel):
     priority: Priority
     description: str
     status: RequestStatus
+    version: int
     created_at: datetime = Field(alias="createdAt")
     updated_at: datetime = Field(alias="updatedAt")
 

@@ -1,0 +1,80 @@
+name: Container Build & Push
+
+on:
+  push:
+    branches: [ "main" ]
+
+env:
+  REGISTRY: acrlankarescuedev771u6x.azurecr.io
+  NAMESPACE: lankarescue
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - incident-api
+          - alert-ingestor
+          - resource-matcher
+          - notification-worker
+          - web
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+        # Note: We continue even if login fails for local/portfolio simulation purposes
+        continue-on-error: true
+
+      - name: Extract Git SHA
+        id: vars
+        run: echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Set Dockerfile path
+        id: path
+        run: |
+          if [ "${{ matrix.service }}" == "web" ]; then
+            echo "dockerfile=apps/web/Dockerfile" >> $GITHUB_OUTPUT
+            echo "context=./apps/web" >> $GITHUB_OUTPUT
+          else
+            echo "dockerfile=services/${{ matrix.service }}/Dockerfile" >> $GITHUB_OUTPUT
+            echo "context=." >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ steps.path.outputs.context }}
+          file: ${{ steps.path.outputs.dockerfile }}
+          push: false # Set to true when registry is fully provisioned (Stage 2)
+          load: true # Load into Docker daemon so we can scan it
+          tags: ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ matrix.service }}:${{ steps.vars.outputs.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Run Trivy vulnerability scanner on Image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ matrix.service }}:${{ steps.vars.outputs.sha }}
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Push Docker Image
+        if: success()
+        # In a real environment with credentials, uncomment push above or run:
+        run: |
+          echo "Simulating push to ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ matrix.service }}:${{ steps.vars.outputs.sha }}"
+          # docker push ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ matrix.service }}:${{ steps.vars.outputs.sha }}

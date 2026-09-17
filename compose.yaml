@@ -1,0 +1,68 @@
+name: lankarescue-local
+
+x-python-service: &python-service
+  build:
+    context: .
+  environment:
+    - DATABASE_URL=postgresql+asyncpg://lankarescue:local-development-only@postgres:5432/lankarescue
+    - LOG_LEVEL=DEBUG
+  depends_on:
+    postgres:
+      condition: service_healthy
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_DB: lankarescue
+      POSTGRES_USER: lankarescue
+      POSTGRES_PASSWORD: local-development-only
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lankarescue -d lankarescue"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    volumes:
+      - lankarescue-postgres:/var/lib/postgresql/data
+
+  incident-api:
+    <<: *python-service
+    build:
+      dockerfile: services/incident-api/Dockerfile
+    ports:
+      - "8000:8000"
+
+  alert-ingestor:
+    <<: *python-service
+    build:
+      dockerfile: services/alert-ingestor/Dockerfile
+    ports:
+      - "8001:8000"
+
+  resource-matcher:
+    <<: *python-service
+    build:
+      dockerfile: services/resource-matcher/Dockerfile
+    ports:
+      - "8002:8000"
+
+  notification-worker:
+    <<: *python-service
+    build:
+      dockerfile: services/notification-worker/Dockerfile
+    ports:
+      - "8003:8000"
+
+  web:
+    build:
+      context: apps/web
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+
+volumes:
+  lankarescue-postgres:
